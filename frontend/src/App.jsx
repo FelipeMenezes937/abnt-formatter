@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import mammoth from 'mammoth'
 import JSZip from 'jszip'
 import './App.css'
@@ -8,6 +8,15 @@ function App() {
   const [processando, setProcessando] = useState(false)
   const [mensagem, setMensagem] = useState('')
   const [downloadUrl, setDownloadUrl] = useState(null)
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode')
+    return saved ? JSON.parse(saved) : false
+  })
+
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(darkMode))
+    document.body.classList.toggle('dark', darkMode)
+  }, [darkMode])
 
   const handleArquivo = (e) => {
     const file = e.target.files[0]
@@ -129,6 +138,9 @@ function App() {
 
   return (
     <div className="container">
+      <button className="theme-toggle" onClick={() => setDarkMode(!darkMode)} title="Modo noturno">
+        {darkMode ? '☀️' : '🌙'}
+      </button>
       <h1>Formatador ABNT</h1>
       <p className="subtitulo">Transforme documento para padrão ABNT</p>
 

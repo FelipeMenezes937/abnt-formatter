@@ -6,19 +6,35 @@
   <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <style>
-    body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; }
-    h1 { text-align: center; color: #333; }
-    .upload-area { border: 2px dashed #ccc; padding: 30px; text-align: center; margin: 20px 0; }
-    button { width: 100%; padding: 15px; background: #2e7d32; color: white; border: none; font-size: 16px; cursor: pointer; }
+    body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; background: #f9f9f9; }
+    .container { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #333; margin-top: 0; }
+    .upload-area { border: 2px dashed #ccc; padding: 30px; text-align: center; margin: 20px 0; border-radius: 4px; }
+    button { width: 100%; padding: 15px; background: #2e7d32; color: white; border: none; font-size: 16px; cursor: pointer; border-radius: 4px; }
     button:disabled { background: #ccc; cursor: not-allowed; }
+    button:hover:not(:disabled) { background: #1b5e20; }
     .sucesso { color: green; text-align: center; }
     .erro { color: red; text-align: center; }
-    .download-btn { display: block; width: 100%; padding: 15px; background: #1976d2; color: white; text-align: center; text-decoration: none; margin-top: 10px; }
+    .download-btn { display: block; width: 100%; padding: 15px; background: #1976d2; color: white; text-align: center; text-decoration: none; margin-top: 10px; border-radius: 4px; }
+    .download-btn:hover { background: #1565c0; }
+    .theme-toggle { position: absolute; top: 20px; right: 20px; background: none; border: 2px solid #ccc; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 18px; }
+    .theme-toggle:hover { border-color: #333; background: #eee; }
+    /* Dark Mode */
+    body.dark { background: #1a1a2e; }
+    body.dark .container { background: #16213e; }
+    body.dark h1, body.dark p { color: #eee; }
+    body.dark .upload-area { border-color: #444; }
+    body.dark .theme-toggle { border-color: #555; color: #ffd700; }
+    body.dark .theme-toggle:hover { border-color: #888; background: #333; }
+    body.dark button:hover:not(:disabled) { background: #388e3c; }
+    body.dark .download-btn:hover { background: #1e88e5; }
   </style>
 </head>
 <body>
-  <h1>Formatador ABNT</h1>
-  <div class="upload-area">
+  <button class="theme-toggle" onclick="toggleDark()" id="themeBtn">🌙</button>
+  <div class="container">
+    <h1>Formatador ABNT</h1>
+    <div class="upload-area">
     <input type="file" id="fileInput" accept=".docx,.txt">
     <p id="fileName"></p>
   </div>
@@ -27,6 +43,18 @@
   <a id="download" class="download-btn" style="display:none">Download</a>
 
   <script>
+    const savedDark = localStorage.getItem('darkMode');
+    if (savedDark === 'true') {
+      document.body.classList.add('dark');
+      document.getElementById('themeBtn').textContent = '☀️';
+    }
+
+    function toggleDark() {
+      const isDark = document.body.classList.toggle('dark');
+      localStorage.setItem('darkMode', isDark);
+      document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+    }
+
     const fileInput = document.getElementById('fileInput');
     const fileName = document.getElementById('fileName');
     const btn = document.getElementById('btn');
@@ -151,5 +179,6 @@
       btn.disabled = false;
     }
   </script>
+  </div>
 </body>
 </html>

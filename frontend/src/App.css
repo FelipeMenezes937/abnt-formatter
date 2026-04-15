@@ -121,3 +121,76 @@ h1 {
   color: #e65100;
   font-family: monospace;
 }
+
+/* Dark Mode */
+body.dark {
+  background: #1a1a2e;
+}
+
+body.dark .container {
+  background: #16213e;
+}
+
+body.dark h1,
+body.dark .subtitulo,
+body.dark .file-name {
+  color: #eee;
+}
+
+body.dark .upload-area {
+  border-color: #444;
+}
+
+body.dark .regras {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+body.dark .regras h3 {
+  color: #eee;
+}
+
+body.dark .regras ul {
+  color: #ccc;
+}
+
+body.dark .btn-formatar:hover:not(:disabled) {
+  background: #388e3c;
+}
+
+body.dark .btn-download:hover {
+  background: #1e88e5;
+}
+
+/* Toggle Button */
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.theme-toggle:hover {
+  border-color: #333;
+  background: #eee;
+}
+
+body.dark .theme-toggle {
+  border-color: #555;
+  color: #ffd700;
+}
+
+body.dark .theme-toggle:hover {
+  border-color: #888;
+  background: #333;
+}
