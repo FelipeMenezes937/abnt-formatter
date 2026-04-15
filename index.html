@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Formatador ABNT</title>
+  <style>
+    body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; }
+    h1 { text-align: center; color: #333; }
+    .upload-area { border: 2px dashed #ccc; padding: 30px; text-align: center; margin: 20px 0; }
+    button { width: 100%; padding: 15px; background: #2e7d32; color: white; border: none; font-size: 16px; cursor: pointer; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .sucesso { color: green; text-align: center; }
+    .erro { color: red; text-align: center; }
+    .download-btn { display: block; width: 100%; padding: 15px; background: #1976d2; color: white; text-align: center; text-decoration: none; margin-top: 10px; }
+    .info { margin-top: 20px; padding: 15px; background: #f5f5f5; }
+  </style>
+</head>
+<body>
+  <h1>Formatador ABNT</h1>
+  <div class="upload-area">
+    <input type="file" id="fileInput" accept=".docx,.txt">
+    <p id="fileName"></p>
+  </div>
+  <button id="btn" onclick="formatar()" disabled>Formatar Documento</button>
+  <p id="msg"></p>
+  <a id="download" class="download-btn" style="display:none">Download</a>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const fileName = document.getElementById('fileName');
+    const btn = document.getElementById('btn');
+    const msg = document.getElementById('msg');
+    const download = document.getElementById('download');
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (file) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (ext === 'docx' || ext === 'txt') {
+          fileName.textContent = file.name;
+          btn.disabled = false;
+          msg.textContent = '';
+        }
+      }
+    });
+
+    async function formatar() {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      btn.disabled = true;
+      msg.textContent = 'Processando...';
+
+      const reader = new FileReader();
+      reader.onload = async function() {
+        const base64 = reader.result.split(',')[1];
+        
+        try {
+          const r = await fetch('/formatar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ arquivo: base64, nome: file.name })
+          });
+          
+          if (!r.ok) throw new Error('Erro ' + r.status);
+          
+          const data = await r.json();
+          
+          if (data.erro) throw new Error(data.erro);
+          
+          const binary = atob(data.arquivo);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+          }
+          
+          const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+          const url = URL.createObjectURL(blob);
+          
+          download.href = url;
+          download.download = 'documento_abnt.docx';
+          download.style.display = 'block';
+          msg.textContent = 'Sucesso!';
+        } catch (e) {
+          msg.textContent = 'Erro: ' + e.message;
+        }
+        btn.disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+</html>
