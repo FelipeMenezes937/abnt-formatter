@@ -1,46 +1,86 @@
 # Formatador ABNT
 
-Sistema que formata documentos automaticamente para o padrão ABNT. **Processamento 100% no browser** - sem backend.
+Formate seus documentos automaticamente para o padrão ABNT diretamente no navegador.
 
-## Estrutura
+## Sobre
+
+Sistema de formatação de documentos que aplica as normas ABNT (NBR 14724) sem necessidade de servidor. Todo o processamento ocorre no browser, garantindo velocidade, privacidade e simplicidade de uso.
+
+## Estrutura do Projeto
 
 ```
 abnt-formatter/
-├── index.html        # Versão standalone (HTML puro)
-├── frontend/         # React (Vite)
-│   ├── src/
-│   └── package.json
-├── TROUBLESHOOT.md
-└── *.docx            # Arquivos de teste
+├── index.html        Aplicação standalone em HTML puro
+├── frontend/         React + Vite
+│   └── src/
+│       ├── App.jsx   Componente principal
+│       └── App.css   Estilos
+└── *.docx            Arquivos de exemplo
 ```
 
-## Regras ABNT Aplicadas
+## Regras Aplicadas
 
-- Fonte: Times New Roman, tamanho 12
-- Espaçamento: 1,5 linhas
-- Margens: superior/esquerda 3cm, inferior/direita 2cm
-- Alinhamento: justificado
-- Recuo: 1,25cm (primeira linha)
+| Elemento | Especificação |
+|----------|---------------|
+| Fonte | Times New Roman 12pt |
+| Espaçamento | 1,5 entre linhas |
+| Margem superior | 3cm |
+| Margem esquerda | 3cm |
+| Margem inferior | 2cm |
+| Margem direita | 2cm |
+| Alinhamento | Justificado |
+| Recuo | 1,25cm (primeira linha) |
 
-## Como Rodar
+## Como Usar
 
-### Opção 1: HTML Standalone
+### Opção 1: Aplicação Standalone
+
+A forma mais rápida de usar:
+
 ```bash
-# Apenas abra index.html no navegador
-# Ou use um servidor estático:
+# Abra diretamente no navegador
+open index.html
+
+# Ou sirva com servidor HTTP
 npx serve .
 ```
 
 ### Opção 2: Frontend React
+
+Para desenvolvimento ou customização:
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Acessar: http://localhost:5173
+
+Acesse: `http://localhost:5173`
 
 ## Tecnologias
 
-- **Frontend**: React, Vite, mammoth, jszip
-- Processamento local (sem servidor)
-- DOCX criado manualmente com XML (via jszip)
+- **mammoth** - Extração de texto de arquivos DOCX
+- **jszip** - Geração de arquivos DOCX (ZIP com XML)
+- **React** - Interface do usuário
+- **Vite** - Build e servidor de desenvolvimento
+
+## Funcionamento
+
+1. O arquivo enviado (`.docx` ou `.txt`) é lido no navegador
+2. O texto é extraído usando mammoth (para DOCX) ou FileReader (para TXT)
+3. Um novo arquivo DOCX é gerado com a formatação ABNT especificada
+4. O documento formatado é disponibilizado para download
+
+## Limitações
+
+- Imagens e tabelas não são preservadas (apenas texto)
+- Formatação avançada (negrito, itálico) não é mantida
+- Arquivos muito grandes podem travar o navegador
+
+## Compatibilidade
+
+Funciona em todos os navegadores modernos:
+- Chrome 80+
+- Firefox 75+
+- Safari 13+
+- Edge 80+
