@@ -10,7 +10,8 @@ abnt-formatter/
 ├── frontend/         # React (Vite)
 │   ├── src/
 │   └── package.json
-└── TROUBLESHOOT.md
+├── TROUBLESHOOT.md
+└── *.docx            # Arquivos de teste
 ```
 
 ## Regras ABNT Aplicadas
