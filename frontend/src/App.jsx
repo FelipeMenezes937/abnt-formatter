@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import mammoth from 'mammoth'
+import JSZip from 'jszip'
 import './App.css'
 
 function App() {
@@ -22,33 +24,107 @@ function App() {
     }
   }
 
-  const formatarDocumento = () => {
+  const criarDocxAbnt = async (linhas) => {
+    const zip = new JSZip()
+    
+    const contentTypes = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`
+
+    const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`
+
+    const documentRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+</Relationships>`
+
+    const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:style w:type="paragraph" w:default="1" w:styleId="Normal">
+    <w:name w:val="Normal"/>
+    <w:qFormat/>
+  </w:style>
+</w:styles>`
+
+    const paragraphsXml = linhas.map(linha => {
+      const escapedText = linha
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+      return `<w:p>
+        <w:pPr>
+          <w:jc w:val="both"/>
+          <w:ind w:firstLine="1250"/>
+          <w:spacing w:line="360" w:lineRule="auto"/>
+        </w:pPr>
+        <w:r>
+          <w:rPr>
+            <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>
+            <w:sz w:val="24"/>
+          </w:rPr>
+          <w:t>${escapedText}</w:t>
+        </w:r>
+      </w:p>`
+    }).join('')
+
+    const document = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    <w:sectPr>
+      <w:pgSz w:w="12240" w:h="15840"/>
+      <w:pgMar w:top="1701" w:right="1134" w:bottom="1134" w:left="1701" w:header="708" w:footer="708" w:gutter="0"/>
+    </w:sectPr>
+    ${paragraphsXml}
+  </w:body>
+</w:document>`
+
+    zip.file('[Content_Types].xml', contentTypes)
+    zip.file('_rels/.rels', rels)
+    zip.file('word/_rels/document.xml.rels', documentRels)
+    zip.file('word/document.xml', document)
+    zip.file('word/styles.xml', styles)
+
+    return await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })
+  }
+
+  const formatarDocumento = async () => {
     if (!arquivo) return
 
     setProcessando(true)
     setMensagem('Processando...')
 
-    const formData = new FormData()
-    formData.append('arquivo', arquivo)
+    try {
+      let texto = ''
+      const ext = arquivo.name.split('.').pop().toLowerCase()
 
-    fetch('http://localhost:3001/formatar', {
-      method: 'POST',
-      body: formData,
-    })
-    .then(res => {
-      if (!res.ok) throw new Error('Erro: ' + res.status)
-      return res.arrayBuffer()
-    })
-    .then(buffer => {
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })
+      if (ext === 'docx') {
+        const arrayBuffer = await arquivo.arrayBuffer()
+        const result = await mammoth.extractRawText({ arrayBuffer })
+        texto = result.value
+      } else {
+        texto = await arquivo.text()
+      }
+
+      const linhas = texto.split('\n').filter(l => l.trim())
+
+      if (linhas.length === 0) {
+        linhas.push('')
+      }
+
+      const blob = await criarDocxAbnt(linhas)
       const url = URL.createObjectURL(blob)
       setDownloadUrl(url)
       setMensagem('Sucesso!')
-    })
-    .catch(erro => {
-      setMensagem(erro.message)
-    })
-    .finally(() => setProcessando(false))
+    } catch (erro) {
+      setMensagem('Erro: ' + erro.message)
+    } finally {
+      setProcessando(false)
+    }
   }
 
   return (

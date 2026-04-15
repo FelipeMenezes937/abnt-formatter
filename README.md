@@ -1,18 +1,16 @@
-# Formatador ABNT - MVP
+# Formatador ABNT
 
-Sistema que formata documentos automaticamente para o padrão ABNT.
+Sistema que formata documentos automaticamente para o padrão ABNT. **Processamento 100% no browser** - sem backend.
 
 ## Estrutura
 
 ```
 abnt-formatter/
-├── backend/          # Servidor Node.js
-│   ├── package.json
-│   ├── server.js
-│   └── uploads/      # Arquivos temporários
-└── frontend/         # React (Vite)
-    ├── src/
-    └── package.json
+├── index.html        # Versão standalone (HTML puro)
+├── frontend/         # React (Vite)
+│   ├── src/
+│   └── package.json
+└── TROUBLESHOOT.md
 ```
 
 ## Regras ABNT Aplicadas
@@ -25,44 +23,23 @@ abnt-formatter/
 
 ## Como Rodar
 
-### 1. Instalar dependências
-
-Backend:
+### Opção 1: HTML Standalone
 ```bash
-cd backend
-npm install
+# Apenas abra index.html no navegador
+# Ou use um servidor estático:
+npx serve .
 ```
 
-Frontend:
+### Opção 2: Frontend React
 ```bash
 cd frontend
 npm install
-```
-
-### 2. Iniciar servidores
-
-Terminal 1 (Backend):
-```bash
-cd backend
-npm start
-```
-Servidor rodando em http://localhost:3001
-
-Terminal 2 (Frontend):
-```bash
-cd frontend
 npm run dev
 ```
-Frontend em http://localhost:5173
-
-### 3. Usar
-
-1. Abra http://localhost:5173
-2. Faça upload de um arquivo .docx ou .txt
-3. Clique em "Formatar Documento"
-4. Faça download do arquivo formatado
+Acessar: http://localhost:5173
 
 ## Tecnologias
 
-- **Backend**: Node.js, Express, multer, mammoth, docx
-- **Frontend**: React, Vite
+- **Frontend**: React, Vite, mammoth, jszip
+- Processamento local (sem servidor)
+- DOCX criado manualmente com XML (via jszip)
