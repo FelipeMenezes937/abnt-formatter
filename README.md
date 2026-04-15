@@ -64,6 +64,16 @@ Acesse: `http://localhost:5173`
 - **React** - Interface do usuário
 - **Vite** - Build e servidor de desenvolvimento
 
+## Deploy no GitHub Pages
+
+O projeto está configurado para deploy automático. Para habilitar:
+
+1. No repositório GitHub, vá em **Settings > Pages**
+2. Em **Source**, selecione **GitHub Actions**
+3. Faça push para o branch `main`
+
+O site será atualizado automaticamente a cada push.
+
 ## Funcionamento
 
 1. O arquivo enviado (`.docx` ou `.txt`) é lido no navegador
