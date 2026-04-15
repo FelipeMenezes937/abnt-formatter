@@ -23,6 +23,14 @@ const ListIcon = () => (
   <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
 )
 
+const EyeIcon = () => (
+  <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+)
+
+const CloseIcon = () => (
+  <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+)
+
 function App() {
   const [arquivo, setArquivo] = useState(null)
   const [processando, setProcessando] = useState(false)
@@ -33,6 +41,8 @@ function App() {
     const saved = localStorage.getItem('darkMode')
     return saved ? JSON.parse(saved) : false
   })
+  const [textoOriginal, setTextoOriginal] = useState('')
+  const [textoFormatado, setTextoFormatado] = useState('')
   const fileInputRef = useRef(null)
 
   useEffect(() => {
@@ -45,20 +55,35 @@ function App() {
     if (file) processarFile(file)
   }
 
-  const processarFile = (file) => {
+  const processarFile = async (file) => {
     const ext = file.name.split('.').pop().toLowerCase()
     if (ext === 'docx' || ext === 'txt') {
       setArquivo(file)
       setMensagem('')
       setDownloadUrl(null)
+      setTextoFormatado('')
+
+      try {
+        let texto = ''
+        if (ext === 'docx') {
+          const arrayBuffer = await file.arrayBuffer()
+          const result = await mammoth.extractRawText({ arrayBuffer })
+          texto = result.value
+        } else {
+          texto = await file.text()
+        }
+        setTextoOriginal(texto)
+      } catch {
+        setTextoOriginal('')
+      }
     }
   }
 
-  const handleDrop = (e) => {
+  const handleDrop = async (e) => {
     e.preventDefault()
     setIsDragOver(false)
     const file = e.dataTransfer.files[0]
-    if (file) processarFile(file)
+    if (file) await processarFile(file)
   }
 
   const handleDragOver = (e) => {
@@ -162,6 +187,9 @@ function App() {
         linhas.push('')
       }
 
+      const textoFormatadoPreview = linhas.join('\n')
+      setTextoFormatado(textoFormatadoPreview)
+
       const blob = await criarDocxAbnt(linhas)
       const url = URL.createObjectURL(blob)
       setDownloadUrl(url)
@@ -239,6 +267,50 @@ function App() {
           <DownloadIcon />
           Download
         </a>
+      )}
+
+      {textoOriginal && (
+        <button 
+          className="btn-preview-toggle" 
+          onClick={() => setTextoFormatado(prev => prev === 'show_original' ? '' : 'show_original')}
+        >
+          <EyeIcon />
+          {textoFormatado === 'show_original' ? 'Ocultar original' : 'Ver documento original'}
+        </button>
+      )}
+
+      {textoFormatado && textoFormatado !== 'show_original' && (
+        <button 
+          className="btn-preview-toggle btn-preview-formatted" 
+          onClick={() => setTextoFormatado(prev => prev === 'show_formatted' ? '' : 'show_formatted')}
+        >
+          <EyeIcon />
+          {textoFormatado === 'show_formatted' ? 'Ocultar formatado' : 'Ver documento formatado'}
+        </button>
+      )}
+
+      {textoFormatado === 'show_original' && (
+        <div className="preview-container">
+          <div className="preview-header">
+            <span className="preview-title">Documento Original</span>
+            <button className="preview-close" onClick={() => setTextoFormatado('')}>
+              <CloseIcon />
+            </button>
+          </div>
+          <pre className="preview-content">{textoOriginal}</pre>
+        </div>
+      )}
+
+      {textoFormatado === 'show_formatted' && (
+        <div className="preview-container preview-formatted">
+          <div className="preview-header">
+            <span className="preview-title">Documento Formatado (ABNT)</span>
+            <button className="preview-close" onClick={() => setTextoFormatado('')}>
+              <CloseIcon />
+            </button>
+          </div>
+          <pre className="preview-content">{textoOriginal}</pre>
+        </div>
       )}
 
       <div className="regras">
